@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+# check branching
 """
 Created on Mon Jun 29 22:54:34 2020
 
@@ -16,7 +17,7 @@ class Game(pygame.sprite.Sprite):
     def __init__(self):
         pygame.sprite.Sprite.__init__(self)
     
-    def move(direction):
+    def move(xpiece, ypiece, xmove, ymove): # how do we want to choose a piece to be moved?
         """
         (str)->bool
         
@@ -34,17 +35,21 @@ class Game(pygame.sprite.Sprite):
         """
         return True
 
+# maybe we could add a field that just is an id number (1-12) so that the player can more easily choose the piece to move
+# the number could then be displayed on the piece
+# also do we want to make a pygame.sprite.Group for each side so that we can access the pieces?
 class Piece(pygame.sprite.Sprite):
-    def __init__(self, x_position, y_position, player):
+    def __init__(self, x_position, y_position, player, id_num):
         pygame.sprite.Sprite.__init__(self)
         screen = pygame.display.get_surface()
         self.x = x_position
         self.y = y_position
         self.player = player # for now this is a colour... but eventually we could use this for human vs computer ??
         self.radius = 20
+        self.id = id_num
         pygame.draw.circle(screen, self.player, (self.x, self.y), self.radius)
 
-# encounters error opening pygame window
+
 def main():
     pygame.init()
     
