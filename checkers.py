@@ -39,16 +39,22 @@ class Game(pygame.sprite.Sprite):
 # the number could then be displayed on the piece
 # also do we want to make a pygame.sprite.Group for each side so that we can access the pieces?
 class Piece(pygame.sprite.Sprite):
-    def __init__(self, x_position, y_position, player, id_num):
+    def __init__(self, x_position, y_position, player):
         pygame.sprite.Sprite.__init__(self)
         screen = pygame.display.get_surface()
         self.x = x_position
         self.y = y_position
         self.player = player # for now this is a colour... but eventually we could use this for human vs computer ??
         self.radius = 20
-        self.id = id_num
         pygame.draw.circle(screen, self.player, (self.x, self.y), self.radius)
-
+ 
+# the side that the pieces belong to
+# same as colour of the piece
+# container for accessing the pieces
+class Side(pygame.sprite.Group):
+    def __init__(self, colour):
+        pygame.sprite.Group.__init__(self)
+        self.colour = colour
 
 def main():
     pygame.init()
