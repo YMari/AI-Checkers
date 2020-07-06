@@ -48,13 +48,6 @@ class Piece(pygame.sprite.Sprite):
         self.radius = 20
         pygame.draw.circle(screen, self.player, (self.x, self.y), self.radius)
  
-# the side that the pieces belong to
-# same as colour of the piece
-# container for accessing the pieces
-class Side(pygame.sprite.Group):
-    def __init__(self, colour):
-        pygame.sprite.Group.__init__(self)
-        self.colour = colour
 
 def main():
     pygame.init()
