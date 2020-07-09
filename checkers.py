@@ -3,6 +3,7 @@
 import doctest
 import pygame
 import numpy
+import os
 
 # Some important variables for the entire program 
 black, white, red, blue = (0, 0, 0), (255, 255, 255), (255, 0, 0), (0, 0, 255)
@@ -54,6 +55,37 @@ class Piece(pygame.sprite.Sprite):
         #screen = pygame.display.get_surface()
         #pygame.draw.circle(screen, self.player, (self.rect.centerx, self.rect.centery), self.radius)
         #return True
+        
+    # potential issue with the coordinates of where the crown will be added   
+    def load_image(self, name):
+        """ 
+        (str) -> image (not sure what kind of object or data type an image would be)
+        Loads an image and returns image object"""
+        fullname = os.path.join('images', name) # filepath of the image
+        try:
+            image = pygame.image.load(fullname) # image object loaded from path
+            
+            # make the image go over the colour of the piece
+            if self.player == red:
+                image.set_colorkey(red) 
+            else:
+                image.set_colorkey(blue)
+                
+            if image.get_alpha() == None: # 
+                image = image.convert()
+            else:
+                image =image.convert_alpha()
+        except pygame.error:
+            print('Cannot load image: ', fullname)
+            raise SystemExit
+        return image
+        
+    def king(self):
+        """Kings a piece """
+        self.type = "king"
+        # here we would add a visual component of a king using load_image
+        self.load_image('crown.jpg')
+        
 
 class Space(pygame.sprite.Sprite):
     def __init__(self, shape):
