@@ -3,10 +3,10 @@
 import doctest
 import pygame
 import numpy
-<<<<<<< HEAD
-=======
+#<<<<<<< HEAD
+#=======
 import os
->>>>>>> v1.1
+#>>>>>>> v1.1
 
 # Some important variables for the entire program 
 black, white, red, blue = (0, 0, 0), (255, 255, 255), (255, 0, 0), (0, 0, 255)
@@ -58,8 +58,8 @@ class Piece(pygame.sprite.Sprite):
         #screen = pygame.display.get_surface()
         #pygame.draw.circle(screen, self.player, (self.rect.centerx, self.rect.centery), self.radius)
         #return True
-<<<<<<< HEAD
-=======
+#<<<<<<< HEAD
+#=======
         
     # potential issue with the coordinates of where the crown will be added   
     def load_image(self, name):
@@ -91,7 +91,7 @@ class Piece(pygame.sprite.Sprite):
         # here we would add a visual component of a king using load_image
         self.load_image('crown.jpg')
         
->>>>>>> v1.1
+#>>>>>>> v1.1
 
 class Space(pygame.sprite.Sprite):
     def __init__(self, shape):
