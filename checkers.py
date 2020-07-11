@@ -8,6 +8,8 @@ import numpy
 import os
 #>>>>>>> v1.1
 
+from game import *
+
 # Some important variables for the entire program 
 black, white, red, blue = (0, 0, 0), (255, 255, 255), (255, 0, 0), (0, 0, 255)
 size = 50
@@ -15,19 +17,6 @@ surface_sz = 400 # Surface size in pixels
 
 # the board holds a matrix representation of the positions of our game pieces 
 board = numpy.zeros((8,8))
-
-class Game(pygame.sprite.Sprite):
-    def __init__(self):
-        pygame.sprite.Sprite.__init__(self)
-    
-        
-    def winner():
-        """ 
-        ()->bool
-        
-        Returns true if there is a winner of the game, false otherwise.
-        """
-        return True
 
 class Piece(pygame.sprite.Sprite):
     def __init__(self, x_position, y_position, player):
@@ -103,6 +92,9 @@ class Space(pygame.sprite.Sprite):
 
 def main():
     pygame.init()
+
+    # Main game object with first player as red (human)
+    game = Game('red')
     
     # Create surface of (width, height) and its window
     main_surface = pygame.display.set_mode((surface_sz, surface_sz))
@@ -113,6 +105,10 @@ def main():
 
     # Initialize game groups
     pieces = pygame.sprite.RenderUpdates()
+    blue_pieces = pygame.sprite.RenderUpdates()
+    blue_kings = pygame.sprite.RenderUpdates()
+    red_pieces = pygame.sprite.RenderUpdates()
+    red_kings = pygame.sprite.RenderUpdates()
     spaces = pygame.sprite.RenderUpdates()
 
     # overpaint a smaller rectangle on the main surface
@@ -128,10 +124,14 @@ def main():
         for j in range(8): # y position            
             if i % 2 != j % 2:
                 if j < 3:
-                    pieces.add(Piece(*getPixels(i,j),blue))
+                    blue_piece = Piece(*getPixels(i,j),blue)
+                    pieces.add(blue_piece)
+                    blue_pieces.add(blue_piece)
                     board[j][i] = 1 # updating the matrix with "1" for player 1's pieces
                 elif j > 4:
-                    pieces.add(Piece(*getPixels(i,j),red))
+                    red_piece = Piece(*getPixels(i,j),red)
+                    pieces.add(red_piece)
+                    red_pieces.add(red_piece)
                     board[j][i] = 2 # updating the matrix with "2" for player 2's pieces
     
     # display surface
@@ -141,6 +141,7 @@ def main():
     space_selected = pygame.sprite.GroupSingle()
     
     while True:
+        # human's turn 
         for event in pygame.event.get():
             if event.type == pygame.QUIT: # if window close button clicked then leave game loop
                 break
@@ -156,6 +157,10 @@ def main():
                 # move is not actually moving anything !!
                 piece_selected.sprite.move(orig_x, orig_y, pos_x, pos_y)
                 pygame.display.update()
+
+        # computer's turn
+        
+        
     pygame.quit()
     
 def getPixels(x_pos, y_pos):
