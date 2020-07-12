@@ -1,3 +1,5 @@
+import pygame
+
 class Game(pygame.sprite.Sprite):
     def __init__(self, first_player):
         pygame.sprite.Sprite.__init__(self)
@@ -16,7 +18,7 @@ class Game(pygame.sprite.Sprite):
         # if blue wins
             # return 'blue'
         
-    def game_evaluation(self)
+    def game_evaluation(self):
         '''
         UTILITY FUNCTION
         Defines the final numeric value for the game when it’s in its terminal state
@@ -25,7 +27,7 @@ class Game(pygame.sprite.Sprite):
         # if someone has won the game then return an infinite value
         if self.winner == 'red': # human has won
             return float('inf') 
-        elif self.winner == 'blue' # AI has won
+        elif self.winner == 'blue': # AI has won
             return float('-inf')
 
 
