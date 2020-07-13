@@ -86,6 +86,15 @@ class Piece(pygame.sprite.Sprite):
         # here we would add a visual component of a king using load_image
         self.load_image('crown.jpg')
         
+    def capture(self, x_coord, y_coord):
+        """
+        Removes a piece from the matrix.
+        """
+        board[y_coord][x_coord] = 0
+        draw_board()
+        pygame.display.update()
+        
+        
 def draw_board(board):
     '''
     Updates the position of the pieces on the board after every move, by copying the board array 
@@ -153,7 +162,7 @@ def main():
     # Fill background
     main_surface.fill(white)
 
-    # overpaint a smaller rectangle on the main surface
+    # Create the board
     for i in range(8): # x position
         for j in range(8): # y position
             small_rect = (size*i, size*j, size, size)
@@ -162,6 +171,7 @@ def main():
                 spaces.add(Space(small_rect, black, i, j))
             else:
                 spaces.add(Space(small_rect, white, i, j))
+                
 
     # add the pieces to the board
     for i in range(8): # x position
