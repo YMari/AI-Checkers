@@ -85,7 +85,14 @@ class Piece(pygame.sprite.Sprite):
         self.type = "king"
         # here we would add a visual component of a king using load_image
         self.load_image('crown.jpg')
+
+    def capture(self, x_coord, y_coord):
+        """
+        Captures a piece by changing the matrix value of that piece.
+        """
+        board[y_coord][x_coord] = 0
         
+
 def draw_board(board):
     '''
     Updates the position of the pieces on the board after every move, by copying the board array 
