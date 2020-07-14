@@ -2,7 +2,7 @@
 
 import doctest
 import pygame
-import numpy
+import numpy, math
 #<<<<<<< HEAD
 #=======
 import os
@@ -86,13 +86,14 @@ class Piece(pygame.sprite.Sprite):
         # here we would add a visual component of a king using load_image
         self.load_image('crown.jpg')
         
-    def capture(self, x_coord, y_coord):
+    def capture(self, x_coord, y_coord, colour):
         """
         Removes a piece from the matrix.
         """
         board[y_coord][x_coord] = 0
-        draw_board()
-        pygame.display.update()
+        pieces.remove(*getPixels(x_coord, y_coord), colour) # remove piece from group
+        draw_board() # build new board with changes
+        pygame.display.update() # display new board
         
         
 def draw_board(board):
@@ -217,10 +218,16 @@ def main():
                 pos = pygame.mouse.get_pos()
                 space_selected.add(space for space in spaces if space.rect.collidepoint(pos)) # position for piece to move
 
-                # updating the board array 
-                my_color = board[piece_selected.sprite.y_pos][piece_selected.sprite.x_pos]
-                board[piece_selected.sprite.y_pos][piece_selected.sprite.x_pos] = 0
-                board[space_selected.sprite.y_pos][space_selected.sprite.x_pos] = my_color
+                # if player chose to move by one diagonal, allow move
+                if dist(piece_selected.sprite.x_pos, space_selected.sprite.x_pos, piece_selected.sprite.y_pos, \
+                        space_selected.sprite.y_pos) == math.sqrt(2):
+                    # updating the board array 
+                    my_color = board[piece_selected.sprite.y_pos][piece_selected.sprite.x_pos]
+                    board[piece_selected.sprite.y_pos][piece_selected.sprite.x_pos] = 0
+                    board[space_selected.sprite.y_pos][space_selected.sprite.x_pos] = my_color
+                
+                # add else block and check for piece in jump if player chose to move more than one diagonal
+                # otherwise do nothing or prompt user to choose a valid move
                 
                 draw_board(board) # redrawing board after each move 
                 pygame.display.update()
@@ -248,6 +255,11 @@ def getPixels(x_pos, y_pos):
     # write something to catch error if board position is not in dictionary (out of bounds, not an integer, etc) 
 
     return (x_pixel, y_pixel)
+
+def dist(x1, x2, y1, y2):
+    """ Distance helper method"""
+    distance = math.sqrt((x2 - x1) ** 2 + (y2 - y1) ** 2)
+    return distance
     
     
 if __name__ == "__main__":
