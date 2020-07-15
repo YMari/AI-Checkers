@@ -33,7 +33,6 @@ class Piece(pygame.sprite.Sprite):
         #self.rect.centerx = x_position
         #self.rect.centery = y_position
 
-
         
     ''' REMOVE METHOD ?? NOT NEEDED NOW THAT WE HAVE DRAW_BOARD()
     def move(self, x_start, y_start, x_end, y_end):
@@ -55,7 +54,15 @@ class Piece(pygame.sprite.Sprite):
         #pygame.draw.circle(screen, self.player, (self.rect.centerx, self.rect.centery), self.radius)
         #return True
     '''
-        
+    
+    def get_colour(num):
+        if num == 1:
+            return blue
+        elif num == 2:
+            return red
+        else:
+            return None
+    
     # potential issue with the coordinates of where the crown will be added   
     def load_image(self, name):
         """ 
@@ -86,14 +93,21 @@ class Piece(pygame.sprite.Sprite):
         # here we would add a visual component of a king using load_image
         self.load_image('crown.jpg')
         
-    def capture(self, x_coord, y_coord, colour):
+#<<<<<<< HEAD
+    def capture(x_coord, y_coord, colour):
+#>>>>>>> owens_checkers
         """
         Removes a piece from the matrix.
         """
         board[y_coord][x_coord] = 0
+#<<<<<<< HEAD
+        draw_board()
+        pygame.display.update()
+#=======
         pieces.remove(*getPixels(x_coord, y_coord), colour) # remove piece from group
         draw_board() # build new board with changes
         pygame.display.update() # display new board
+#>>>>>>> owens_checkers
         
         
 def draw_board(board):
@@ -218,7 +232,7 @@ def main():
                 pos = pygame.mouse.get_pos()
                 space_selected.add(space for space in spaces if space.rect.collidepoint(pos)) # position for piece to move
 
-                # if player chose to move by one diagonal, allow move
+                # if player choses to move by one diagonal, allow move
                 if dist(piece_selected.sprite.x_pos, space_selected.sprite.x_pos, piece_selected.sprite.y_pos, \
                         space_selected.sprite.y_pos) == math.sqrt(2):
                     # updating the board array 
@@ -228,6 +242,17 @@ def main():
                 
                 # add else block and check for piece in jump if player chose to move more than one diagonal
                 # otherwise do nothing or prompt user to choose a valid move
+                elif dist(piece_selected.sprite.x_pos, space_selected.sprite.x_pos, piece_selected.sprite.y_pos, \
+                        space_selected.sprite.y_pos) == 2 * math.sqrt(2):
+                    x_jumped = (space_selected.sprite.x_pos - piece_selected.sprite.x_pos)/2 + piece_selected.sprite.x_pos
+                    y_jumped = (space_selected.sprite.y_pos - piece_selected.sprite.y_pos)/2 + piece_selected.sprite.y_pos
+                    
+                    # jumped a piece
+                    if board[y_jumped][x_jumped] != 0 and\
+                        board[y_jumped][x_jumped] != board[piece_selected.sprite.y_pos][piece_selected.sprite.x_pos]:
+                            
+                        Piece.capture(x_jumped, y_jumped, Piece.get_colour(board[y_jumped][x_jumped]))
+                    
                 
                 draw_board(board) # redrawing board after each move 
                 pygame.display.update()
