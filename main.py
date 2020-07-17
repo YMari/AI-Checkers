@@ -251,8 +251,12 @@ def main():
                     if board[y_jumped][x_jumped] != 0 and\
                         board[y_jumped][x_jumped] != board[piece_selected.sprite.y_pos][piece_selected.sprite.x_pos]:
                             
-                        Piece.capture(x_jumped, y_jumped, Piece.get_colour(board[y_jumped][x_jumped]))
-                    
+                        Piece.capture(x_jumped, y_jumped, Piece.get_colour(board[y_jumped][x_jumped])) # capture piece
+                        # move the piece that jumped the other
+                        my_color = board[piece_selected.sprite.y_pos][piece_selected.sprite.x_pos]
+                        board[piece_selected.sprite.y_pos][piece_selected.sprite.x_pos] = 0
+                        board[space_selected.sprite.y_pos][space_selected.sprite.x_pos] = my_color
+                        
                 
                 draw_board(board) # redrawing board after each move 
                 pygame.display.update()
