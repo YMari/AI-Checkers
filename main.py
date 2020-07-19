@@ -3,6 +3,7 @@
 import doctest
 import pygame
 import numpy
+import time
 #<<<<<<< HEAD
 #=======
 import os
@@ -10,7 +11,7 @@ import os
 
 from game import *
 
-# Some important variables for the entire program 
+# Some important variables 
 black, white, red, blue = (0, 0, 0), (255, 255, 255), (255, 0, 0), (0, 0, 255)
 size = 50
 surface_sz = 400 # Surface size in pixels
@@ -107,11 +108,12 @@ def draw_board(board):
         j = 0
         for space in row:
             if space == 1:
-                pygame.draw.circle(screen, blue, getPixels(j,i), radius)
-            elif space == 2:
                 pygame.draw.circle(screen, red, getPixels(j,i), radius)
+            elif space == 2:
+                pygame.draw.circle(screen, blue, getPixels(j,i), radius)
             j+=1
         i+=1
+    pygame.display.update()
     
 def draw_background():
     '''
@@ -153,7 +155,7 @@ def main():
     pygame.init()
 
     # Main game object with first player as red (human)
-    game = Game('red')
+    game = Game('red', 3) # change to 10
     
     # Create surface of (width, height) and its window
     main_surface = pygame.display.set_mode((surface_sz, surface_sz))
@@ -181,12 +183,13 @@ def main():
                     blue_piece = Piece(*getPixels(i,j),blue)
                     pieces.add(blue_piece)
                     blue_pieces.add(blue_piece)
-                    board[j][i] = 1 # updating the matrix with "1" for player 1's pieces
+                    board[j][i] = 2 # updating the matrix with "2" for blue pieces
                 elif j > 4:
                     red_piece = Piece(*getPixels(i,j),red)
                     pieces.add(red_piece)
                     red_pieces.add(red_piece)
-                    board[j][i] = 2 # updating the matrix with "2" for player 2's pieces
+                    board[j][i] = 1 # updating the matrix with "1" for red pieces
+
 
     draw_board(board) # adding the pieces to the board now that they have been added to the board matrix 
     
@@ -197,37 +200,51 @@ def main():
     space_selected = pygame.sprite.GroupSingle()
     temp_selected = pygame.sprite.GroupSingle()
     second_click = False # this variable is used to differentiate the two click events (MOUSEBUTTONDOWN) 
+    awaiting_red = True
     
     while True:
-        # human's turn 
-        for event in pygame.event.get():
-            
-            if event.type == pygame.QUIT: # if window close button clicked then leave game loop
-                break
-            
-            if event.type == pygame.MOUSEBUTTONDOWN and second_click == False: # click piece to move 
-                pos = pygame.mouse.get_pos()
-                temp_selected.add(space for space in spaces if space.rect.collidepoint(pos)) 
-                my_space = temp_selected.sprite
-                if board[my_space.y_pos][my_space.x_pos] != 0: # we are selecting a non-empty space
-                    piece_selected.add(my_space)
-                    second_click = True
-                  
-            elif event.type == pygame.MOUSEBUTTONDOWN and second_click == True: # click new position for piece 
-                pos = pygame.mouse.get_pos()
-                space_selected.add(space for space in spaces if space.rect.collidepoint(pos)) # position for piece to move
-
-                # updating the board array 
-                my_color = board[piece_selected.sprite.y_pos][piece_selected.sprite.x_pos]
-                board[piece_selected.sprite.y_pos][piece_selected.sprite.x_pos] = 0
-                board[space_selected.sprite.y_pos][space_selected.sprite.x_pos] = my_color
-                
-                draw_board(board) # redrawing board after each move 
-                pygame.display.update()
-                second_click = False
-
-        # computer's turn
         
+        # human's turn
+        if game.turn == 'red':
+            awaiting_red = True
+            while awaiting_red:
+                for event in pygame.event.get(): 
+                    if event.type == pygame.QUIT: # if window close button clicked then leave game loop
+                        break
+                        
+                    if event.type == pygame.MOUSEBUTTONDOWN and second_click == False: # click piece to move 
+                        pos = pygame.mouse.get_pos()
+                        temp_selected.add(space for space in spaces if space.rect.collidepoint(pos)) 
+                        my_space = temp_selected.sprite
+                        if board[my_space.y_pos][my_space.x_pos] != 0: # we are selecting a non-empty space
+                            piece_selected.add(my_space)
+                            second_click = True
+                              
+                    elif event.type == pygame.MOUSEBUTTONDOWN and second_click == True: # click new position for piece 
+                        pos = pygame.mouse.get_pos()
+                        space_selected.add(space for space in spaces if space.rect.collidepoint(pos)) # position for piece to move
+
+                        # updating the board array 
+                        my_color = board[piece_selected.sprite.y_pos][piece_selected.sprite.x_pos]
+                        board[piece_selected.sprite.y_pos][piece_selected.sprite.x_pos] = 0
+                        board[space_selected.sprite.y_pos][space_selected.sprite.x_pos] = my_color                      
+                        second_click = False
+                        awaiting_red = False
+                        
+        # computer's turn
+        elif game.turn == 'blue':
+            move = game.get_move(board)
+
+            # updating the board matrix 
+            for i in range(8): # x position
+                for j in range(8): # y position
+                    new_space = move[0][j][i]
+                    board[j][i] = new_space
+
+        # for some reason the screen doesn't update until after both players have made moves?? can't figure out how to fix this 
+        draw_board(board)
+        pygame.display.update()
+        game.change_turn()
         
     pygame.quit()
     

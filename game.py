@@ -1,4 +1,5 @@
 import pygame
+import numpy
 from copy import deepcopy
 
 class Game(pygame.sprite.Sprite):
@@ -8,34 +9,55 @@ class Game(pygame.sprite.Sprite):
         Player indicates the colour of the player on the current turn
         '''
         pygame.sprite.Sprite.__init__(self)
-        self.turn = first_player # 'red' or 'blue' Side object
+        self.turn = first_player # 'red' or 'blue' 
         self.max_depth = max_depth
+
+    def change_turn(self):
+        if self.turn == 'red':
+            self.turn = 'blue'
+        elif self.turn == 'blue':
+            self.turn = 'red'
+            
         
-        
-    def winner(self, board):
+    def winner(self, player, board):
         '''
         Checks if the game has ended and returns the winner
         '''
-        # if not ended
-            # return False
-
-        # if red wins
-            # return 'red'
-
-        # if blue wins
-            # return 'blue'
+        total_red = 0
+        total_blue = 0
         
-    def game_evaluation(self, some_board):
+        for row in board:
+            for space in row:
+                if space == 1 or space == 3:
+                    total_red += 1
+                elif space == 2 or space == 4:
+                    total_blue += 1
+        
+        if total_blue == 0 and total_red > 0: # red wins
+            return 'red'
+
+        if total_red == 0 and total_blue > 0: # blue wins
+            return 'blue'
+
+        if len(self.red_moves(board)) == 0 and player == 'red': # no possible red moves available, blue wins
+            return 'blue'
+
+        if len(self.blue_moves(board)) == 0 and player == 'blue': # no possible blue moves available, red wins
+            return 'red'
+        
+        return False # game has not ended
+        
+    def game_evaluation(self, player, board):
         '''
         UTILITY FUNCTION
         Defines the final numeric value for the game when it’s in its terminal state
         '''
         
         # if someone has won the game then return an infinite value
-        if self.winner == 'red': # human has won
-            return float('inf') 
-        elif self.winner == 'blue': # AI has won
-            return float('-inf')
+        if self.winner(player, board) == 'red': # human has won
+            return float('-inf') 
+        elif self.winner(player, board) == 'blue': # AI has won
+            return float('inf')
 
 
         '''
@@ -53,19 +75,39 @@ class Game(pygame.sprite.Sprite):
 
         score = 0
         constant = 0
+
+        # note that these are not the same variables as those from main.py because these are for any arbitrary board that is passed to the function
+        # whereas those in main.py are for the board in its current state as shown on the screen to the player 
+        red_kings_arb = 0
+        red_pieces_arb = 0
+        blue_kings_arb = 0
+        blue_pieces_arb = 0
+
+        for row in board:
+            for space in row:
+                if space == 1: # 1 represents a red piece (non-king)
+                    red_pieces_arb += 1
+                elif space == 2: # 2 represents a blue piece (non-king) 
+                    blue_pieces_arb += 1
+                elif space == 3: # 3 represents a red king
+                    red_pieces_arb += 1
+                    red_kings_arb += 1
+                elif space == 4: # 4 represents a blue king 
+                    blue_pieces_arb += 1
+                    blue_kings_arb += 1
         
-        if self.turn == 'red':
-            constant = 1
-            score += 30 * len(red_kings.sprites())
-            difference = len(red_pieces.sprites()) - len(blue_pieces.sprites())
-            score += 10 * difference
-        elif self.turn == 'blue':
+        if player == 'red':
             constant = -1
-            score += 30 * len(blue_kings.sprites())
-            difference = len(blue_pieces.sprites()) - len(red_pieces.sprites())
+            score += 30 * red_kings_arb
+            difference = red_pieces_arb - blue_pieces_arb
+            score += 10 * difference
+        elif player == 'blue':
+            constant = 1
+            score += 30 * blue_kings_arb
+            difference = blue_pieces_arb - red_pieces_arb
             score += 10 * difference
 
-        score = score*constant # the constant mediates the fact that the human wants a more positive score while AI wants more negative 
+        score = score*constant # the constant mediates the fact that the human wants a more negative score while AI wants more positive
         return score
 
     def get_move(self, board):
@@ -73,25 +115,22 @@ class Game(pygame.sprite.Sprite):
         Takes the board matrix as input and returns the best move
         '''
         best_board = None
-        cur_depth = self.max_depth + 1
-
-        while not best_board and cur_depth > 0:
-            cur_depth -= 1
-            (best_board, value) = max_move(board, cur_depth)
+        cur_depth = self.max_depth 
+        (best_board, value) = self.max_move(board, cur_depth)
 
         return (best_board, value) 
 
-    def max_move(self, board, cur_depth):
+    def max_move(self, max_board, cur_depth):
         '''
-        Used to recursively traverse the tree
+        Used to recursively traverse the tree, finds best move for blue player 
         '''
-        return find_move(max_board, cur_depth-1, 'red')
+        return self.find_move(max_board, cur_depth-1, 'blue')
 
-    def min_move(self, board, cur_depth):
+    def min_move(self, min_board, cur_depth):
         '''
-        Used to recursively traverse the tree
+        Used to recursively traverse the tree, finds best move for red player
         '''
-        return find_move(min_board, cur_depth-1, 'blue')
+        return self.find_move(min_board, cur_depth-1, 'red')
 
     def find_move(self, board, cur_depth, player):
         '''
@@ -99,29 +138,29 @@ class Game(pygame.sprite.Sprite):
         Returns the best board and its score 
         '''
         # checks if we are at a leaf
-        if (winner() != False) or (cur_depth < 1):
-            return (board, game_evaluation(board))
+        if (self.winner(player, board) != False) or (cur_depth < 1):
+            return (board, self.game_evaluation(player, board))
 
         # this executes if we are not at a leaf
         best_board = None
         
-        if player == 'red': # human wants a board with inf score
+        if player == 'blue': # AI wants a board with inf score
             best_score = float('-inf')
-            moves = red_moves(board) # get board matrices of all possible red moves
+            moves = self.blue_moves(board) # get board matrices of all possible red moves
             for move in moves:
                 max_board = move
-                value = min_move(max_board, cur_depth-1)[1]
+                value = self.min_move(max_board, cur_depth-1)[1]
                 if value > best_score:
                     best_score = value
                     best_board = max_board
             
         
-        elif player == 'blue': # AI wants a board with -inf score
+        elif player == 'red': # human wants a board with -inf score
             best_score = float('inf')
-            moves = blue_moves(board) # get board matrices of all possible blue moves
+            moves = self.red_moves(board) # get board matrices of all possible blue moves
             for move in moves:
                 min_board = board
-                value = max_move(min_board, cur_depth-1)[1]
+                value = self.max_move(min_board, cur_depth-1)[1]
                 if value < best_score:
                     best_score = value
                     best_board = min_board
@@ -136,6 +175,103 @@ class Game(pygame.sprite.Sprite):
         '''
         possible_moves = []
 
+        for i in range(len(board)):
+            row = board[i]
+            for j in range(len(row)):
+                new_board = deepcopy(board)
+                space = row[j]
+                if space == 2 or space == 4: # 2 represents a blue piece (non-king) and 4 represents a blue king 
+                    if j>0 and i<7 and board[i+1][j-1] == 0: # checks if the space diagnally left and forward is empty 
+                        new_board = deepcopy(board)
+                        new_board[i][j] = 0
+                        if i+1 == 7 and space == 2: # the piece has reached the opposite side and becomes a king 
+                            new_board[i+1][j-1] = 4
+                        else: 
+                            new_board[i+1][j-1] = space
+                        possible_moves.append(new_board)                   
+                    
+                    if j<7 and i<7 and board[i+1][j+1] == 0: # checks if the space diagnally right and forward is empty
+                        new_board = deepcopy(board)
+                        new_board[i][j] = 0
+                        if i+1 == 7 and space == 2: # the piece has reached the opposite side and becomes a king 
+                            new_board[i+1][j+1] = 4
+                        else:
+                            new_board[i+1][j+1] = space
+                        possible_moves.append(new_board)
+
+                    if space == 4 and i>0 and j>0 and board[i-1][j-1] == 0: # checks if the space diagnally left and back is empty
+                        new_board = deepcopy(board)
+                        new_board[i][j] = 0
+                        new_board[i-1][j-1] = space
+                        possible_moves.append(new_board)
+
+                    if space == 4 and i>0 and j<7 and board[i-1][j+1] == 0: # checks if the space diagnally right and back is empty
+                        new_board = deepcopy(board)
+                        new_board[i][j] = 0
+                        new_board[i-1][j+1] = space
+                        possible_moves.append(new_board)
+
+                    '''
+                    This nested function is used to find all possible captures of the red pieces by the blue pieces
+                    It utilizes recursion to find all combinations of jumps when there are multiple options available 
+                    '''
+                    
+                    def keep_jumping_blue(new_board, cur_i, cur_j, cur_piece):
+
+                        # checks if we can jump a red piece diagonally forward and left 
+                        if cur_j>1 and cur_i<6 and (new_board[cur_i+1][cur_j-1] == 1 or new_board[cur_i+1][cur_j-1] == 3):
+                            if new_board[cur_i+2][cur_j-2] == 0:
+                                this_piece = cur_piece
+                                if cur_i+2 == 7 and this_piece == 2:
+                                    this_piece = 4 # the piece has reached the opposite side and becomes a king
+                                some_board = deepcopy(new_board)
+                                some_board[cur_i+2][cur_j-2] = this_piece 
+                                some_board[cur_i+1][cur_j-1] = 0 # jumped piece disappears
+                                some_board[cur_i][cur_j] = 0 # original space is now empty
+                                possible_moves.append(some_board)
+                                keep_jumping_blue(some_board, cur_i+2, cur_j-2, this_piece)
+                        
+                        # checks if we can jump a red piece diagonally forward and right
+                        if cur_j<6 and cur_i<6 and (new_board[cur_i+1][cur_j+1] == 1 or new_board[cur_i+1][cur_j+1] == 3):
+                            if new_board[cur_i+2][cur_j+2] == 0:
+                                this_piece = cur_piece
+                                if cur_i+2 == 7 and this_piece == 2:
+                                    this_piece = 4 # the piece has reached the opposite side and becomes a king
+                                some_board = deepcopy(new_board)
+                                some_board[cur_i+2][cur_j+2] = this_piece 
+                                some_board[cur_i+1][cur_j+1] = 0 # jumped piece disappears
+                                some_board[cur_i][cur_j] = 0 # original space is now empty
+                                possible_moves.append(some_board)
+                                keep_jumping_blue(some_board, cur_i+2, cur_j+2, this_piece)
+
+                        # checks if we can jump a red piece diagonally back and left 
+                        if cur_piece == 4 and cur_j>1 and cur_i>1 and (new_board[cur_i-1][cur_j-1] == 1 or new_board[cur_i-1][cur_j-1] == 3):
+                            if new_board[cur_i-2][cur_j-2] == 0:
+                                some_board = deepcopy(new_board)
+                                some_board[cur_i-2][cur_j-2] = cur_piece 
+                                some_board[cur_i-1][cur_j-1] = 0 # jumped piece disappears
+                                some_board[cur_i][cur_j] = 0 # original space is now empty
+                                possible_moves.append(some_board)
+                                keep_jumping_blue(some_board, cur_i-2, cur_j-2, cur_piece)
+
+                        # checks if we can jump a red piece diagonally back and right 
+                        if cur_piece == 4 and cur_j<6 and cur_i>1 and (new_board[cur_i-1][cur_j+1] == 1 or new_board[cur_i-1][cur_j+1] == 3):
+                            if new_board[cur_i-2][cur_j+2] == 0:
+                                some_board = deepcopy(new_board)
+                                some_board[cur_i-2][cur_j+2] = cur_piece 
+                                some_board[cur_i-1][cur_j+1] = 0 # jumped piece disappears
+                                some_board[cur_i][cur_j] = 0 # original space is now empty
+                                possible_moves.append(some_board)
+                                keep_jumping_blue(some_board, cur_i-2, cur_j+2, cur_piece)
+                          
+                        return new_board                                
+
+                    new_board = deepcopy(board)
+                    cur_i = i
+                    cur_j = j
+                    cur_piece = space
+                    keep_jumping_blue(new_board, cur_i, cur_j, cur_piece)
+       
         return possible_moves
 
 
@@ -146,8 +282,102 @@ class Game(pygame.sprite.Sprite):
         '''
         possible_moves = []
 
+        for i in range(len(board)):
+            row = board[i]
+            for j in range(len(row)):                
+                space = row[j]
+                if space == 1 or space == 3: # 1 represents a red piece (non-king) and 3 represents a red king 
+                    if j>0 and i>0 and board[i-1][j-1] == 0: # checks if the space diagnally left and forward is empty 
+                        new_board = deepcopy(board)
+                        new_board[i][j] = 0
+                        if i-1 == 0 and space == 1: # the piece has reached the opposite side and becomes a king 
+                            new_board[i-1][j-1] = 3
+                        else: 
+                            new_board[i-1][j-1] = space
+                        possible_moves.append(new_board)                   
+                    
+                    if j<7 and i>0 and board[i-1][j+1] == 0: # checks if the space diagnally right and forward is empty
+                        new_board = deepcopy(board)
+                        new_board[i][j] = 0
+                        if i-1 == 0 and space == 1: # the piece has reached the opposite side and becomes a king 
+                            new_board[i-1][j+1] = 3
+                        else:
+                            new_board[i-1][j+1] = space
+                        possible_moves.append(new_board)
+
+                    if space == 3 and i<7 and j>0 and board[i+1][j-1] == 0: # checks if the space diagnally left and back is empty
+                        new_board = deepcopy(board)
+                        new_board[i][j] = 0
+                        new_board[i+1][j-1] = space
+                        possible_moves.append(new_board)
+
+                    if space == 3 and i<7 and j<7 and board[i+1][j+1] == 0: # checks if the space diagnally right and back is empty
+                        new_board = deepcopy(board)
+                        new_board[i][j] = 0
+                        new_board[i+1][j+1] = space
+                        possible_moves.append(new_board)                        
+
+                    
+                    '''
+                    This nested function is used to find all possible captures of the blue pieces by the red pieces
+                    It utilizes recursion to find all combinations of jumps when there are multiple options available 
+                    '''
+                    
+                    def keep_jumping_red(new_board, cur_i, cur_j, cur_piece):
+
+                        # checks if we can jump a blue piece diagonally forward and left 
+                        if cur_j>1 and cur_i>1 and (new_board[cur_i-1][cur_j-1] == 2 or new_board[cur_i-1][cur_j-1] == 4):
+                            if new_board[cur_i-2][cur_j-2] == 0:
+                                this_piece = cur_piece
+                                if cur_i-2 == 0 and this_piece == 1:
+                                    this_piece = 3 # the piece has reached the opposite side and becomes a king
+                                some_board = deepcopy(new_board)
+                                some_board[cur_i-2][cur_j-2] = this_piece 
+                                some_board[cur_i-1][cur_j-1] = 0 # jumped piece disappears
+                                some_board[cur_i][cur_j] = 0 # original space is now empty
+                                possible_moves.append(some_board)
+                                keep_jumping_red(some_board, cur_i-2, cur_j-2, this_piece)
+                        
+                        # checks if we can jump a blue piece diagonally forward and right
+                        if cur_j<6 and cur_i>1 and (new_board[cur_i-1][cur_j+1] == 2 or new_board[cur_i-1][cur_j+1] == 4):
+                            if new_board[cur_i-2][cur_j+2] == 0:
+                                this_piece = cur_piece
+                                if cur_i-2 == 0 and this_piece == 1:
+                                    this_piece = 3 # the piece has reached the opposite side and becomes a king
+                                some_board = deepcopy(new_board)
+                                some_board[cur_i-2][cur_j+2] = this_piece 
+                                some_board[cur_i-1][cur_j+1] = 0 # jumped piece disappears
+                                some_board[cur_i][cur_j] = 0 # original space is now empty
+                                possible_moves.append(some_board)
+                                keep_jumping_red(some_board, cur_i-2, cur_j+2, this_piece)
+                            
+                        # checks if we can jump a blue piece diagonally back and left 
+                        if cur_piece == 3 and cur_j>1 and cur_i<6 and (new_board[cur_i+1][cur_j-1] == 2 or new_board[cur_i+1][cur_j-1] == 4):
+                            if new_board[cur_i+2][cur_j-2] == 0:
+                                some_board = deepcopy(new_board)
+                                some_board[cur_i+2][cur_j-2] = cur_piece 
+                                some_board[cur_i+1][cur_j-1] = 0 # jumped piece disappears
+                                some_board[cur_i][cur_j] = 0 # original space is now empty
+                                possible_moves.append(some_board)
+                                keep_jumping_red(some_board, cur_i+2, cur_j-2, cur_piece)
+
+                        # checks if we can jump a blue piece diagonally back and right 
+                        if cur_piece == 3 and cur_j<6 and cur_i<6 and (new_board[cur_i+1][cur_j+1] == 2 or new_board[cur_i+1][cur_j+1] == 4):
+                            if new_board[cur_i+2][cur_j+2] == 0:
+                                some_board = deepcopy(new_board)
+                                some_board[cur_i+2][cur_j+2] = cur_piece 
+                                some_board[cur_i+1][cur_j+1] = 0 # jumped piece disappears
+                                some_board[cur_i][cur_j] = 0 # original space is now empty
+                                possible_moves.append(some_board)
+                                keep_jumping_red(some_board, cur_i+2, cur_j+2, cur_piece)
+                          
+                        return new_board
+
+                    new_board = deepcopy(board)
+                    cur_i = i
+                    cur_j = j
+                    cur_piece = space
+                    keep_jumping_red(new_board, cur_i, cur_j, cur_piece)
+                    
         return possible_moves  
 
-
-        
-    
