@@ -126,7 +126,6 @@ def draw_board(board):
                 pygame.draw.circle(screen, blue, getPixels(j,i), radius)
             j+=1
         i+=1
-    pygame.display.update()
     
 def draw_background():
     '''
