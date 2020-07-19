@@ -235,13 +235,13 @@ def main():
                 # if player choses to move by one diagonal, allow move
                 if dist(piece_selected.sprite.x_pos, space_selected.sprite.x_pos, piece_selected.sprite.y_pos, \
                         space_selected.sprite.y_pos) == math.sqrt(2):
+                    
                     # updating the board array 
                     my_color = board[piece_selected.sprite.y_pos][piece_selected.sprite.x_pos]
                     board[piece_selected.sprite.y_pos][piece_selected.sprite.x_pos] = 0
                     board[space_selected.sprite.y_pos][space_selected.sprite.x_pos] = my_color
                 
-                # add else block and check for piece in jump if player chose to move more than one diagonal
-                # otherwise do nothing or prompt user to choose a valid move
+                # if the piece moves by two diagonals, check for capture
                 elif dist(piece_selected.sprite.x_pos, space_selected.sprite.x_pos, piece_selected.sprite.y_pos, \
                         space_selected.sprite.y_pos) == 2 * math.sqrt(2):
                     x_jumped = (space_selected.sprite.x_pos - piece_selected.sprite.x_pos)/2 + piece_selected.sprite.x_pos
