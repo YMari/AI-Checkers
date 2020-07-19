@@ -1,6 +1,7 @@
 import pygame
 import numpy
 from copy import deepcopy
+from main import *
 
 class Game(pygame.sprite.Sprite):
     def __init__(self, first_player, max_depth):
