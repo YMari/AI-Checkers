@@ -168,7 +168,7 @@ def main():
     pygame.init()
 
     # Main game object with first player as red (human)
-    game = Game('red', 3) # change to 10
+    game = Game('red', 5) 
     
     # Create surface of (width, height) and its window
     main_surface = pygame.display.set_mode((surface_sz, surface_sz))
