@@ -55,10 +55,10 @@ class Piece(pygame.sprite.Sprite):
     '''
     
     def get_colour(num):
-        if num == 1:
-            return blue
-        elif num == 2:
+        if num == 1 or num == 3:
             return red
+        elif num == 2 or num == 4:
+            return blue
         else:
             return None
     
@@ -93,21 +93,14 @@ class Piece(pygame.sprite.Sprite):
         self.load_image('crown.jpg')
         
 #<<<<<<< HEAD
+
     def capture(x_coord, y_coord, colour):
 #>>>>>>> owens_checkers
         """
         Removes a piece from the matrix.
         """
         board[y_coord][x_coord] = 0
-#<<<<<<< HEAD
-        draw_board()
-        pygame.display.update()
-#=======
         pieces.remove(*getPixels(x_coord, y_coord), colour) # remove piece from group
-        draw_board() # build new board with changes
-        pygame.display.update() # display new board
-#>>>>>>> owens_checkers
-        
         
 def draw_board(board):
     '''
@@ -248,14 +241,15 @@ def main():
                         # otherwise do nothing or prompt user to choose a valid move
                         elif dist(piece_selected.sprite.x_pos, space_selected.sprite.x_pos, piece_selected.sprite.y_pos, \
                                 space_selected.sprite.y_pos) == 2 * math.sqrt(2):
-                            x_jumped = (space_selected.sprite.x_pos - piece_selected.sprite.x_pos)/2 + piece_selected.sprite.x_pos
-                            y_jumped = (space_selected.sprite.y_pos - piece_selected.sprite.y_pos)/2 + piece_selected.sprite.y_pos
+                            x_jumped = int((space_selected.sprite.x_pos - piece_selected.sprite.x_pos)/2) + piece_selected.sprite.x_pos
+                            y_jumped = int((space_selected.sprite.y_pos - piece_selected.sprite.y_pos)/2) + piece_selected.sprite.y_pos
 
                             # jumped a piece
-                            if board[y_jumped][x_jumped] != 0 and\
-                                board[y_jumped][x_jumped] != board[piece_selected.sprite.y_pos][piece_selected.sprite.x_pos]:
+                            if board[y_jumped][x_jumped] != 0 and Piece.get_colour(board[y_jumped][x_jumped]) != Piece.get_colour(my_color):
 
                                 Piece.capture(x_jumped, y_jumped, Piece.get_colour(board[y_jumped][x_jumped]))
+                                board[piece_selected.sprite.y_pos][piece_selected.sprite.x_pos] = 0
+                                board[space_selected.sprite.y_pos][space_selected.sprite.x_pos] = my_color
 
                         second_click = False
                         awaiting_red = False
