@@ -244,7 +244,7 @@ def main():
                             board[piece_selected.sprite.y_pos][piece_selected.sprite.x_pos] = 0
                             board[space_selected.sprite.y_pos][space_selected.sprite.x_pos] = my_color
 
-<<<<<<< HEAD
+#<<<<<<< HEAD
                 # if player choses to move by one diagonal, allow move
                 if dist(piece_selected.sprite.x_pos, space_selected.sprite.x_pos, piece_selected.sprite.y_pos, \
                         space_selected.sprite.y_pos) == math.sqrt(2):
