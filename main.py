@@ -23,36 +23,21 @@ class Piece(pygame.sprite.Sprite):
         
         self.player = player # a colour
         self.radius = 20
-
+        (self.x_pixel, self.y_pixel) = getPixels(x_position, y_position) # needed for king()
+        '''
+    def get_piece(row, col):
+        if board[row][col] == 1:
+            collection = red_pieces
+        elif board[row][col] == 3:
+            collection = red_kings
+        elif board[row][col] == 2:
+            collection = blue_pieces
+        elif board[row][col] == 4:
+            collection = blue_kings
+        else:
+            return None
         
-        ##### Note that our pieces do not have a "rect", meaning they don't have positions on the board
-        ##### I couldn't figure out how to make the pieces move if they had a rect, so I figured it was just easier to redraw new circles on every turn using draw_board()
-        
-        #self.rect = 
-        #self.rect.centerx = x_position
-        #self.rect.centery = y_position
-
-        
-    ''' REMOVE METHOD ?? NOT NEEDED NOW THAT WE HAVE DRAW_BOARD()
-    def move(self, x_start, y_start, x_end, y_end):
-        """
-        (int,int,int,int)->bool
-        
-        Takes as input the starting coordinates and ending coordinates of the desired move and
-        returns true if the move was performed successfully, and false otherwise.
-        
-        """
-        ## the method is updating the position of the rect but not actually moving the piece
-        # using draw.circle does work but doesn't actually move the sprite object itself
-        # not sure what to do 
-        
-        self.rect.centerx = x_end
-        self.rect.centery = y_end
-
-        #screen = pygame.display.get_surface()
-        #pygame.draw.circle(screen, self.player, (self.rect.centerx, self.rect.centery), self.radius)
-        #return True
-    '''
+        '''
     
     def get_colour(num):
         if num == 1 or num == 3:
@@ -63,34 +48,22 @@ class Piece(pygame.sprite.Sprite):
             return None
     
     # potential issue with the coordinates of where the crown will be added   
-    def load_image(self, name):
+    def load_image(x_coord, y_coord, name):
         """ 
-        (str) -> image (not sure what kind of object or data type an image would be)
-        Loads an image and returns image object"""
+        Adds crown image to desired square on board.
+        """
         fullname = os.path.join('images', name) # filepath of the image
-        try:
-            image = pygame.image.load(fullname) # image object loaded from path
-            
-            # make the image go over the colour of the piece
-            if self.player == red:
-                image.set_colorkey(red) 
-            else:
-                image.set_colorkey(blue)
-                
-            if image.get_alpha() == None: # 
-                image = image.convert()
-            else:
-                image =image.convert_alpha()
-        except pygame.error:
-            print('Cannot load image: ', fullname)
-            raise SystemExit
-        return image
+        image = pygame.image.load(fullname) # image object loaded from path
         
-    def king(self):
+        pygame.blit(image, getPixels(x_coord, y_coord)) # add image to the board, not yet updated
+        
+    def king(x_coord, y_coord):
         """Kings a piece """
-        self.type = "king"
-        # here we would add a visual component of a king using load_image
-        self.load_image('crown.jpg')
+        Piece.load_image(x_coord, y_coord, 'crown.jpg')
+        if board[y_coord][x_coord] == 3:
+            red_kings.add(Piece(*getPixels(x_coord, y_coord), red))
+        elif board[y_coord][x_coord] == 4:
+            blue_kings.add(Piece(*getPixels(x_coord, y_coord), blue))
         
 #<<<<<<< HEAD
 
@@ -113,10 +86,12 @@ def draw_board(board):
     for row in board:
         j = 0
         for space in row:
-            if space == 1:
+            if space == 1 or space == 3:
                 pygame.draw.circle(screen, red, getPixels(j,i), radius)
-            elif space == 2:
+            elif space == 2 or space == 4:
                 pygame.draw.circle(screen, blue, getPixels(j,i), radius)
+            if space == 3 or space == 4:
+                Piece.king(j, i)
             j+=1
         i+=1
     
