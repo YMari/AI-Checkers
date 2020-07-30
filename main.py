@@ -32,27 +32,6 @@ class Piece(pygame.sprite.Sprite):
         #self.rect.centerx = x_position
         #self.rect.centery = y_position
 
-        
-    ''' REMOVE METHOD ?? NOT NEEDED NOW THAT WE HAVE DRAW_BOARD()
-    def move(self, x_start, y_start, x_end, y_end):
-        """
-        (int,int,int,int)->bool
-        
-        Takes as input the starting coordinates and ending coordinates of the desired move and
-        returns true if the move was performed successfully, and false otherwise.
-        
-        """
-        ## the method is updating the position of the rect but not actually moving the piece
-        # using draw.circle does work but doesn't actually move the sprite object itself
-        # not sure what to do 
-        
-        self.rect.centerx = x_end
-        self.rect.centery = y_end
-
-        #screen = pygame.display.get_surface()
-        #pygame.draw.circle(screen, self.player, (self.rect.centerx, self.rect.centery), self.radius)
-        #return True
-    '''
     
     def get_colour(num):
         if num == 1 or num == 3:
@@ -61,36 +40,7 @@ class Piece(pygame.sprite.Sprite):
             return blue
         else:
             return None
-    
-    # potential issue with the coordinates of where the crown will be added   
-    def load_image(self, name):
-        """ 
-        (str) -> image (not sure what kind of object or data type an image would be)
-        Loads an image and returns image object"""
-        fullname = os.path.join('images', name) # filepath of the image
-        try:
-            image = pygame.image.load(fullname) # image object loaded from path
-            
-            # make the image go over the colour of the piece
-            if self.player == red:
-                image.set_colorkey(red) 
-            else:
-                image.set_colorkey(blue)
-                
-            if image.get_alpha() == None: # 
-                image = image.convert()
-            else:
-                image =image.convert_alpha()
-        except pygame.error:
-            print('Cannot load image: ', fullname)
-            raise SystemExit
-        return image
-        
-    def king(self):
-        """Kings a piece """
-        self.type = "king"
-        # here we would add a visual component of a king using load_image
-        self.load_image('crown.jpg')
+   
         
 #<<<<<<< HEAD
 
@@ -206,9 +156,14 @@ def main():
     temp_selected = pygame.sprite.GroupSingle()
     second_click = False # this variable is used to differentiate the two click events (MOUSEBUTTONDOWN) 
     awaiting_red = True
+    running = True
     
-    while True:
+    while running:
        
+        if pygame.QUIT in pygame.event.get():
+            running = False
+            break
+        
         # human's turn
         if game.turn == 'red':
             awaiting_red = True
