@@ -46,7 +46,7 @@ class Piece(pygame.sprite.Sprite):
             return blue
         else:
             return None
-    
+    '''
     # potential issue with the coordinates of where the crown will be added   
     def load_image(x_coord, y_coord, name):
         """ 
@@ -55,7 +55,7 @@ class Piece(pygame.sprite.Sprite):
         fullname = os.path.join('images', name) # filepath of the image
         image = pygame.image.load(fullname) # image object loaded from path
         
-        pygame.blit(image, getPixels(x_coord, y_coord)) # add image to the board, not yet updated
+        pygame.Surface.blit(image, getPixels(x_coord, y_coord)) # add image to the board, not yet updated
         
     def king(x_coord, y_coord):
         """Kings a piece """
@@ -64,7 +64,7 @@ class Piece(pygame.sprite.Sprite):
             red_kings.add(Piece(*getPixels(x_coord, y_coord), red))
         elif board[y_coord][x_coord] == 4:
             blue_kings.add(Piece(*getPixels(x_coord, y_coord), blue))
-        
+    '''
 #<<<<<<< HEAD
 
     def capture(x_coord, y_coord, colour):
