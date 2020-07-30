@@ -24,20 +24,16 @@ class Piece(pygame.sprite.Sprite):
         self.player = player # a colour
         self.radius = 20
         (self.x_pixel, self.y_pixel) = getPixels(x_position, y_position) # needed for king()
-        '''
-    def get_piece(row, col):
-        if board[row][col] == 1:
-            collection = red_pieces
-        elif board[row][col] == 3:
-            collection = red_kings
-        elif board[row][col] == 2:
-            collection = blue_pieces
-        elif board[row][col] == 4:
-            collection = blue_kings
-        else:
-            return None
         
-        '''
+
+        
+        ##### Note that our pieces do not have a "rect", meaning they don't have positions on the board
+        ##### I couldn't figure out how to make the pieces move if they had a rect, so I figured it was just easier to redraw new circles on every turn using draw_board()
+        
+        #self.rect = 
+        #self.rect.centerx = x_position
+        #self.rect.centery = y_position
+
     
     def get_colour(num):
         if num == 1 or num == 3:
@@ -46,25 +42,7 @@ class Piece(pygame.sprite.Sprite):
             return blue
         else:
             return None
-    '''
-    # potential issue with the coordinates of where the crown will be added   
-    def load_image(x_coord, y_coord, name):
-        """ 
-        Adds crown image to desired square on board.
-        """
-        fullname = os.path.join('images', name) # filepath of the image
-        image = pygame.image.load(fullname) # image object loaded from path
-        
-        pygame.Surface.blit(image, getPixels(x_coord, y_coord)) # add image to the board, not yet updated
-        
-    def king(x_coord, y_coord):
-        """Kings a piece """
-        Piece.load_image(x_coord, y_coord, 'crown.jpg')
-        if board[y_coord][x_coord] == 3:
-            red_kings.add(Piece(*getPixels(x_coord, y_coord), red))
-        elif board[y_coord][x_coord] == 4:
-            blue_kings.add(Piece(*getPixels(x_coord, y_coord), blue))
-    '''
+
 #<<<<<<< HEAD
 
     def capture(x_coord, y_coord, colour):
@@ -181,9 +159,14 @@ def main():
     temp_selected = pygame.sprite.GroupSingle()
     second_click = False # this variable is used to differentiate the two click events (MOUSEBUTTONDOWN) 
     awaiting_red = True
+    running = True
     
-    while True:
+    while running:
        
+        if pygame.QUIT in pygame.event.get():
+            running = False
+            break
+        
         # human's turn
         if game.turn == 'red':
             awaiting_red = True
