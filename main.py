@@ -23,6 +23,8 @@ class Piece(pygame.sprite.Sprite):
         
         self.player = player # a colour
         self.radius = 20
+        (self.x_pixel, self.y_pixel) = getPixels(x_position, y_position) # needed for king()
+        
 
         
         ##### Note that our pieces do not have a "rect", meaning they don't have positions on the board
@@ -32,82 +34,24 @@ class Piece(pygame.sprite.Sprite):
         #self.rect.centerx = x_position
         #self.rect.centery = y_position
 
-        
-    ''' REMOVE METHOD ?? NOT NEEDED NOW THAT WE HAVE DRAW_BOARD()
-    def move(self, x_start, y_start, x_end, y_end):
-        """
-        (int,int,int,int)->bool
-        
-        Takes as input the starting coordinates and ending coordinates of the desired move and
-        returns true if the move was performed successfully, and false otherwise.
-        
-        """
-        ## the method is updating the position of the rect but not actually moving the piece
-        # using draw.circle does work but doesn't actually move the sprite object itself
-        # not sure what to do 
-        
-        self.rect.centerx = x_end
-        self.rect.centery = y_end
-
-        #screen = pygame.display.get_surface()
-        #pygame.draw.circle(screen, self.player, (self.rect.centerx, self.rect.centery), self.radius)
-        #return True
-    '''
     
     def get_colour(num):
-        if num == 1:
-            return blue
-        elif num == 2:
+        if num == 1 or num == 3:
             return red
+        elif num == 2 or num == 4:
+            return blue
         else:
             return None
-    
-    # potential issue with the coordinates of where the crown will be added   
-    def load_image(self, name):
-        """ 
-        (str) -> image (not sure what kind of object or data type an image would be)
-        Loads an image and returns image object"""
-        fullname = os.path.join('images', name) # filepath of the image
-        try:
-            image = pygame.image.load(fullname) # image object loaded from path
-            
-            # make the image go over the colour of the piece
-            if self.player == red:
-                image.set_colorkey(red) 
-            else:
-                image.set_colorkey(blue)
-                
-            if image.get_alpha() == None: # 
-                image = image.convert()
-            else:
-                image =image.convert_alpha()
-        except pygame.error:
-            print('Cannot load image: ', fullname)
-            raise SystemExit
-        return image
-        
-    def king(self):
-        """Kings a piece """
-        self.type = "king"
-        # here we would add a visual component of a king using load_image
-        self.load_image('crown.jpg')
-        
+
 #<<<<<<< HEAD
+
     def capture(x_coord, y_coord, colour):
 #>>>>>>> owens_checkers
         """
         Removes a piece from the matrix.
         """
         board[y_coord][x_coord] = 0
-#<<<<<<< HEAD
-        draw_board()
-        pygame.display.update()
-#=======
         pieces.remove(*getPixels(x_coord, y_coord), colour) # remove piece from group
-        draw_board() # build new board with changes
-        pygame.display.update() # display new board
-#>>>>>>> owens_checkers
-        
         
 def draw_board(board):
     '''
@@ -120,13 +64,14 @@ def draw_board(board):
     for row in board:
         j = 0
         for space in row:
-            if space == 1:
+            if space == 1 or space == 3:
                 pygame.draw.circle(screen, red, getPixels(j,i), radius)
-            elif space == 2:
+            elif space == 2 or space == 4:
                 pygame.draw.circle(screen, blue, getPixels(j,i), radius)
+            if space == 3 or space == 4:
+                Piece.king(j, i)
             j+=1
         i+=1
-    pygame.display.update()
     
 def draw_background():
     '''
@@ -168,7 +113,7 @@ def main():
     pygame.init()
 
     # Main game object with first player as red (human)
-    game = Game('red', 3) # change to 10
+    game = Game('red', 5) 
     
     # Create surface of (width, height) and its window
     main_surface = pygame.display.set_mode((surface_sz, surface_sz))
@@ -214,9 +159,14 @@ def main():
     temp_selected = pygame.sprite.GroupSingle()
     second_click = False # this variable is used to differentiate the two click events (MOUSEBUTTONDOWN) 
     awaiting_red = True
+    running = True
     
-    while True:
+    while running:
        
+        if pygame.QUIT in pygame.event.get():
+            running = False
+            break
+        
         # human's turn
         if game.turn == 'red':
             awaiting_red = True
@@ -249,14 +199,15 @@ def main():
                         # otherwise do nothing or prompt user to choose a valid move
                         elif dist(piece_selected.sprite.x_pos, space_selected.sprite.x_pos, piece_selected.sprite.y_pos, \
                                 space_selected.sprite.y_pos) == 2 * math.sqrt(2):
-                            x_jumped = (space_selected.sprite.x_pos - piece_selected.sprite.x_pos)/2 + piece_selected.sprite.x_pos
-                            y_jumped = (space_selected.sprite.y_pos - piece_selected.sprite.y_pos)/2 + piece_selected.sprite.y_pos
+                            x_jumped = int((space_selected.sprite.x_pos - piece_selected.sprite.x_pos)/2) + piece_selected.sprite.x_pos
+                            y_jumped = int((space_selected.sprite.y_pos - piece_selected.sprite.y_pos)/2) + piece_selected.sprite.y_pos
 
                             # jumped a piece
-                            if board[y_jumped][x_jumped] != 0 and\
-                                board[y_jumped][x_jumped] != board[piece_selected.sprite.y_pos][piece_selected.sprite.x_pos]:
+                            if board[y_jumped][x_jumped] != 0 and Piece.get_colour(board[y_jumped][x_jumped]) != Piece.get_colour(my_color):
 
                                 Piece.capture(x_jumped, y_jumped, Piece.get_colour(board[y_jumped][x_jumped]))
+                                board[piece_selected.sprite.y_pos][piece_selected.sprite.x_pos] = 0
+                                board[space_selected.sprite.y_pos][space_selected.sprite.x_pos] = my_color
 
                         second_click = False
                         awaiting_red = False
