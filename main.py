@@ -23,8 +23,7 @@ class Piece(pygame.sprite.Sprite):
         
         self.player = player # a colour
         self.radius = 20
-        (self.x_pixel, self.y_pixel) = getPixels(x_position, y_position) # needed for king()
-        
+        (self.x_pixel, self.y_pixel) = (x_position, y_position) # needed for king()
 
         
         ##### Note that our pieces do not have a "rect", meaning they don't have positions on the board
@@ -64,12 +63,14 @@ def draw_board(board):
     for row in board:
         j = 0
         for space in row:
-            if space == 1 or space == 3:
+            if space == 1: # red non-king
                 pygame.draw.circle(screen, red, getPixels(j,i), radius)
-            elif space == 2 or space == 4:
+            elif space == 2:# blue non-king
                 pygame.draw.circle(screen, blue, getPixels(j,i), radius)
-            if space == 3 or space == 4:
-                Piece.king(j, i)
+            elif space == 3: # red king
+                pygame.draw.circle(screen, (255, 153, 153), getPixels(j,i), radius)
+            elif space == 4: # blue king 
+                pygame.draw.circle(screen, (153, 153, 255), getPixels(j,i), radius)
             j+=1
         i+=1
     
@@ -193,7 +194,11 @@ def main():
                             # updating the board array 
                             my_color = board[piece_selected.sprite.y_pos][piece_selected.sprite.x_pos]
                             board[piece_selected.sprite.y_pos][piece_selected.sprite.x_pos] = 0
-                            board[space_selected.sprite.y_pos][space_selected.sprite.x_pos] = my_color
+
+                            if space_selected.sprite.y_pos == 0:
+                                board[space_selected.sprite.y_pos][space_selected.sprite.x_pos] = 3 # becomes a red king
+                            else:
+                                board[space_selected.sprite.y_pos][space_selected.sprite.x_pos] = my_color
 
                         # add else block and check for piece in jump if player chose to move more than one diagonal
                         # otherwise do nothing or prompt user to choose a valid move
@@ -207,7 +212,12 @@ def main():
 
                                 Piece.capture(x_jumped, y_jumped, Piece.get_colour(board[y_jumped][x_jumped]))
                                 board[piece_selected.sprite.y_pos][piece_selected.sprite.x_pos] = 0
-                                board[space_selected.sprite.y_pos][space_selected.sprite.x_pos] = my_color
+                                
+                                if space_selected.sprite.y_pos == 0:
+                                    board[space_selected.sprite.y_pos][space_selected.sprite.x_pos] = 3 # becomes a red king
+                                else:
+                                    board[space_selected.sprite.y_pos][space_selected.sprite.x_pos] = my_color 
+
 
                         second_click = False
                         awaiting_red = False
@@ -222,7 +232,6 @@ def main():
                     new_space = move[0][j][i]
                     board[j][i] = new_space
 
-        # for some reason the screen doesn't update until after both players have made moves?? can't figure out how to fix this 
         draw_board(board)
         pygame.display.update()
         game.change_turn()
