@@ -174,6 +174,7 @@ def main():
             while awaiting_red:
                 for event in pygame.event.get(): 
                     if event.type == pygame.QUIT: # if window close button clicked then leave game loop
+                        running = False
                         break
                         
                     if event.type == pygame.MOUSEBUTTONDOWN and second_click == False: # click piece to move 
@@ -217,11 +218,15 @@ def main():
                                     board[space_selected.sprite.y_pos][space_selected.sprite.x_pos] = 3 # becomes a red king
                                 else:
                                     board[space_selected.sprite.y_pos][space_selected.sprite.x_pos] = my_color 
+                                    
 
 
                         second_click = False
                         awaiting_red = False
                         
+                if not running:
+                    pygame.quit()
+                    
         # computer's turn
         elif game.turn == 'blue':
             move = game.get_move(board)
