@@ -186,6 +186,8 @@ def main():
                             second_click = True
                               
                     elif event.type == pygame.MOUSEBUTTONDOWN and second_click == True: # click new position for piece 
+                    
+                        jumped = False # made True if player jumps a piece
                         pos = pygame.mouse.get_pos()
                         space_selected.add(space for space in spaces if space.rect.collidepoint(pos)) # position for piece to move
                         
@@ -211,6 +213,7 @@ def main():
                             # jumped a piece
                             if board[y_jumped][x_jumped] != 0 and Piece.get_colour(board[y_jumped][x_jumped]) != Piece.get_colour(my_color):
 
+                                jumped = True
                                 Piece.capture(x_jumped, y_jumped, Piece.get_colour(board[y_jumped][x_jumped]))
                                 board[piece_selected.sprite.y_pos][piece_selected.sprite.x_pos] = 0
                                 
@@ -219,10 +222,10 @@ def main():
                                 else:
                                     board[space_selected.sprite.y_pos][space_selected.sprite.x_pos] = my_color 
                                     
-
-
-                        second_click = False
-                        awaiting_red = False
+                        # allow for double jump
+                        if not jumped:
+                            second_click = False
+                            awaiting_red = False
                         
                 if not running:
                     pygame.quit()
