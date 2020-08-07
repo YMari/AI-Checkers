@@ -176,7 +176,7 @@ def main():
                     if event.type == pygame.QUIT: # if window close button clicked then leave game loop
                         running = False
                         break
-                        
+                    
                     if event.type == pygame.MOUSEBUTTONDOWN and second_click == False: # click piece to move 
                         pos = pygame.mouse.get_pos()
                         temp_selected.add(space for space in spaces if space.rect.collidepoint(pos)) 
@@ -222,10 +222,9 @@ def main():
                                 else:
                                     board[space_selected.sprite.y_pos][space_selected.sprite.x_pos] = my_color 
                                     
-                        # allow for double jump
-                        if not jumped:
-                            second_click = False
-                            awaiting_red = False
+                        awaiting_red = False
+                        second_click = False
+                        
                         
                 if not running:
                     pygame.quit()
