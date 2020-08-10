@@ -25,15 +25,6 @@ class Piece(pygame.sprite.Sprite):
         self.radius = 20
         (self.x_pixel, self.y_pixel) = (x_position, y_position) # needed for king()
 
-        
-        ##### Note that our pieces do not have a "rect", meaning they don't have positions on the board
-        ##### I couldn't figure out how to make the pieces move if they had a rect, so I figured it was just easier to redraw new circles on every turn using draw_board()
-        
-        #self.rect = 
-        #self.rect.centerx = x_position
-        #self.rect.centery = y_position
-
-    
     def get_colour(num):
         if num == 1 or num == 3:
             return red
@@ -42,10 +33,8 @@ class Piece(pygame.sprite.Sprite):
         else:
             return None
 
-#<<<<<<< HEAD
 
     def capture(x_coord, y_coord, colour):
-#>>>>>>> owens_checkers
         """
         Removes a piece from the matrix.
         """
@@ -162,6 +151,7 @@ def main():
     awaiting_red = True
     running = True
     
+    
     while running:
        
         if pygame.QUIT in pygame.event.get():
@@ -172,6 +162,8 @@ def main():
         if game.turn == 'red':
             awaiting_red = True
             while awaiting_red:
+                jump_possible = False
+                bad_move = False
                 for event in pygame.event.get(): 
                     if event.type == pygame.QUIT: # if window close button clicked then leave game loop
                         running = False
@@ -186,13 +178,17 @@ def main():
                             second_click = True
                               
                     elif event.type == pygame.MOUSEBUTTONDOWN and second_click == True: # click new position for piece 
-                    
-                        jumped = False # made True if player jumps a piece
+                       
                         pos = pygame.mouse.get_pos()
                         space_selected.add(space for space in spaces if space.rect.collidepoint(pos)) # position for piece to move
+
+                        # ensuring that red non-kings cannot move backwards 
+                        if board[piece_selected.sprite.y_pos][piece_selected.sprite.x_pos] == 1 and space_selected.sprite.y_pos>piece_selected.sprite.y_pos:
+                            print("This piece cannot move backward. Make a different move.")
+                            bad_move = True
                         
-                        # if player choses to move by one diagonal, allow move
-                        if dist(piece_selected.sprite.x_pos, space_selected.sprite.x_pos, piece_selected.sprite.y_pos, \
+                        # if player chooses to move by one diagonal, allow move
+                        elif dist(piece_selected.sprite.x_pos, space_selected.sprite.x_pos, piece_selected.sprite.y_pos, \
                                 space_selected.sprite.y_pos) == math.sqrt(2):
                             # updating the board array 
                             my_color = board[piece_selected.sprite.y_pos][piece_selected.sprite.x_pos]
@@ -203,8 +199,7 @@ def main():
                             else:
                                 board[space_selected.sprite.y_pos][space_selected.sprite.x_pos] = my_color
 
-                        # add else block and check for piece in jump if player chose to move more than one diagonal
-                        # otherwise do nothing or prompt user to choose a valid move
+                        # if player chooses to jump and capture a blue piece, allow move and check if a consecutive jump can occur 
                         elif dist(piece_selected.sprite.x_pos, space_selected.sprite.x_pos, piece_selected.sprite.y_pos, \
                                 space_selected.sprite.y_pos) == 2 * math.sqrt(2):
                             x_jumped = int((space_selected.sprite.x_pos - piece_selected.sprite.x_pos)/2) + piece_selected.sprite.x_pos
@@ -220,11 +215,34 @@ def main():
                                 if space_selected.sprite.y_pos == 0:
                                     board[space_selected.sprite.y_pos][space_selected.sprite.x_pos] = 3 # becomes a red king
                                 else:
-                                    board[space_selected.sprite.y_pos][space_selected.sprite.x_pos] = my_color 
+                                    board[space_selected.sprite.y_pos][space_selected.sprite.x_pos] = my_color
+
+                                cur_x = space_selected.sprite.x_pos
+                                cur_y = space_selected.sprite.y_pos
+                                blue_nums = [2,4]
+
+                                # checking if another jump is possible
+                                if (cur_x > 1) and (cur_x < 6) and (cur_y > 1) and (cur_y < 6) \
+                                      and ((board[cur_y+1][cur_x+1] in blue_nums and board[cur_y+2][cur_x+2] == 0) \
+                                      or (board[cur_y+1][cur_x-1] in blue_nums and board[cur_y+2][cur_x-2] == 0) \
+                                      or (board[cur_y-1][cur_x+1] in blue_nums and board[cur_y-2][cur_x+2] == 0) \
+                                      or (board[cur_y-1][cur_x-1] in blue_nums and board[cur_y-2][cur_x-2] == 0)):
+
+                                    jump_possible = True
+
+                                    # promt user to move again
+                                    print("You can jump again!")
+                
                                     
-                        # allow for double jump
-                        if not jumped:
-                            second_click = False
+                        second_click = False            
+
+                        if jump_possible: # another jump can occur 
+                            awaiting_red = True # red's turn will not end 
+                            draw_board(board) # update the board with the first jump 
+                            pygame.display.update()
+                        elif bad_move: # move is not allowed and player needs to try again
+                            awaiting_red = True
+                        else:
                             awaiting_red = False
                         
                 if not running:
@@ -242,6 +260,14 @@ def main():
 
         draw_board(board)
         pygame.display.update()
+
+        if game.winner(game.turn, board) == 'red':
+            print("Red wins!")
+            running = False
+        elif game.winner(game.turn, board) == 'blue':
+            print("Blue wins!")
+            running = False
+            
         game.change_turn()
         
     pygame.quit()
@@ -271,5 +297,4 @@ def dist(x1, x2, y1, y2):
     
     
 if __name__ == "__main__":
-    #doctest.testmod()
     main()
