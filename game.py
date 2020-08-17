@@ -6,7 +6,7 @@ from main import *
 class Game(pygame.sprite.Sprite):
     def __init__(self, first_player, max_depth):
         '''
-        Max depth indicates the maximum depth of the game tree
+        Max depth indicates the maximum depth of the game tree traversal
         Player indicates the colour of the player on the current turn
         '''
         pygame.sprite.Sprite.__init__(self)
@@ -66,8 +66,8 @@ class Game(pygame.sprite.Sprite):
         Defines an estimate of the expected utility numeric value from a given state
         Outputs a numeric value that represents the outcome and desirabiity of the board state
         Called when the game has not ended
-        The human player is always striving for a more positive (maximum) value
-        The AI is always striving for a more negative (minimum) value 
+        The human player is always striving for a more negative (minimum) value
+        The AI is always striving for a more positive (maximum) value 
         A negative score indicates that the human player is in a disadvantaged position 
         '''
         
@@ -76,36 +76,33 @@ class Game(pygame.sprite.Sprite):
 
         score = 0
         constant = 0
-
-        # note that these are not the same variables as those from main.py because these are for any arbitrary board that is passed to the function
-        # whereas those in main.py are for the board in its current state as shown on the screen to the player 
-        red_kings_arb = 0
-        red_pieces_arb = 0
-        blue_kings_arb = 0
-        blue_pieces_arb = 0
+        red_kings = 0
+        red_pieces = 0
+        blue_kings = 0
+        blue_pieces = 0
 
         for row in board:
             for space in row:
                 if space == 1: # 1 represents a red piece (non-king)
-                    red_pieces_arb += 1
+                    red_pieces += 1
                 elif space == 2: # 2 represents a blue piece (non-king) 
-                    blue_pieces_arb += 1
+                    blue_pieces += 1
                 elif space == 3: # 3 represents a red king
-                    red_pieces_arb += 1
-                    red_kings_arb += 1
+                    red_pieces += 1
+                    red_kings += 1
                 elif space == 4: # 4 represents a blue king 
-                    blue_pieces_arb += 1
-                    blue_kings_arb += 1
+                    blue_pieces += 1
+                    blue_kings += 1
         
         if player == 'red':
             constant = -1
-            score += 30 * red_kings_arb
-            difference = red_pieces_arb - blue_pieces_arb
+            score += 30 * red_kings
+            difference = red_pieces - blue_pieces
             score += 10 * difference
         elif player == 'blue':
             constant = 1
-            score += 30 * blue_kings_arb
-            difference = blue_pieces_arb - red_pieces_arb
+            score += 30 * blue_kings
+            difference = blue_pieces - red_pieces
             score += 10 * difference
 
         score = score*constant # the constant mediates the fact that the human wants a more negative score while AI wants more positive
