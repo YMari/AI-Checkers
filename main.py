@@ -126,7 +126,6 @@ def main():
                     pieces.add(red_piece)
                     board[j][i] = 1 # updating the matrix with "1" for red pieces
 
-
     draw_board(board) # adding the pieces to the board now that they have been added to the board matrix 
     
     # display surface
