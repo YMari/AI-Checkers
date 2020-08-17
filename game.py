@@ -19,7 +19,6 @@ class Game(pygame.sprite.Sprite):
         elif self.turn == 'blue':
             self.turn = 'red'
             
-        
     def winner(self, player, board):
         '''
         Checks if the game has ended and returns the winner
