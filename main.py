@@ -1,18 +1,15 @@
 # -*- coding: utf-8 -*-
 
-import doctest
 import pygame
-import time
 import numpy
 import math
 import os
 
 from game import *
 
-# Some important variables 
 black, white, red, blue = (0, 0, 0), (255, 255, 255), (255, 0, 0), (0, 0, 255)
-size = 50
-surface_sz = 400 # Surface size in pixels
+size = 50 # size of the tiles on the board in pixels 
+surface_sz = 400 # surface size in pixels
 
 # the board holds a matrix representation of the positions of our game pieces 
 board = numpy.zeros((8,8))
@@ -23,7 +20,7 @@ class Piece(pygame.sprite.Sprite):
         
         self.player = player # a colour
         self.radius = 20
-        (self.x_pixel, self.y_pixel) = (x_position, y_position) # needed for king()
+        (self.x_pixel, self.y_pixel) = (x_position, y_position) # the location at which the piece is initialized
 
     def get_colour(num):
         if num == 1 or num == 3:
@@ -33,14 +30,22 @@ class Piece(pygame.sprite.Sprite):
         else:
             return None
 
-
     def capture(x_coord, y_coord, colour):
         """
         Removes a piece from the matrix.
         """
         board[y_coord][x_coord] = 0
         pieces.remove(*getPixels(x_coord, y_coord), colour) # remove piece from group
-        
+
+class Space(pygame.sprite.Sprite):
+    def __init__(self, shape, color, x_pos, y_pos):
+        pygame.sprite.Sprite.__init__(self)
+        screen = pygame.display.get_surface()
+        self.rect = pygame.draw.rect(screen, color, shape)
+        self.color = color
+        self.x_pos = x_pos
+        self.y_pos = y_pos
+
 def draw_board(board):
     '''
     Updates the position of the pieces on the board after every move, by copying the board array 
@@ -65,10 +70,9 @@ def draw_board(board):
     
 def draw_background():
     '''
-    This method is used to reset the board by making it blank without any pieces
+    Used to reset the board by making it blank without any pieces
     It is only used by draw_board after each move
     Note that it is not used when the board is initially set up in main() because we do not want to create new Space objects every time 
-
     '''
     screen = pygame.display.get_surface()
     # overpaint a smaller rectangle on the main surface
@@ -81,28 +85,14 @@ def draw_background():
             else:
                 pygame.draw.rect(screen, white, small_rect)
 
-class Space(pygame.sprite.Sprite):
-    def __init__(self, shape, color, x_pos, y_pos):
-        pygame.sprite.Sprite.__init__(self)
-        screen = pygame.display.get_surface()
-        self.rect = pygame.draw.rect(screen, color, shape)
-        self.color = color
-        self.x_pos = x_pos
-        self.y_pos = y_pos
-        
-
 # Initialize game groups
 pieces = pygame.sprite.RenderUpdates()
-blue_pieces = pygame.sprite.RenderUpdates()
-blue_kings = pygame.sprite.RenderUpdates()
-red_pieces = pygame.sprite.RenderUpdates()
-red_kings = pygame.sprite.RenderUpdates()
 spaces = pygame.sprite.RenderUpdates()
 
 def main():
     pygame.init()
 
-    # Main game object with first player as red (human)
+    # Main Game object with first player as red (human) and a maximum depth of 5 for the game tree traversal
     game = Game('red', 5) 
     
     # Create surface of (width, height) and its window
@@ -123,19 +113,17 @@ def main():
                 spaces.add(Space(small_rect, white, i, j))
                 
 
-    # add the pieces to the board
+    # add the pieces to the board matrix
     for i in range(8): # x position
         for j in range(8): # y position            
             if i % 2 != j % 2:
                 if j < 3:
                     blue_piece = Piece(*getPixels(i,j),blue)
                     pieces.add(blue_piece)
-                    blue_pieces.add(blue_piece)
                     board[j][i] = 2 # updating the matrix with "2" for blue pieces
                 elif j > 4:
                     red_piece = Piece(*getPixels(i,j),red)
                     pieces.add(red_piece)
-                    red_pieces.add(red_piece)
                     board[j][i] = 1 # updating the matrix with "1" for red pieces
 
 
@@ -150,20 +138,16 @@ def main():
     second_click = False # this variable is used to differentiate the two click events (MOUSEBUTTONDOWN) 
     awaiting_red = True
     running = True
-    
-    
-    while running:
        
-        if pygame.QUIT in pygame.event.get():
-            running = False
-            break
-        
+    while running:
+
         # human's turn
         if game.turn == 'red':
             awaiting_red = True
             while awaiting_red:
                 jump_possible = False
                 bad_move = False
+                
                 for event in pygame.event.get(): 
                     if event.type == pygame.QUIT: # if window close button clicked then leave game loop
                         running = False
@@ -177,8 +161,7 @@ def main():
                             piece_selected.add(my_space)
                             second_click = True
                               
-                    elif event.type == pygame.MOUSEBUTTONDOWN and second_click == True: # click new position for piece 
-                       
+                    elif event.type == pygame.MOUSEBUTTONDOWN and second_click == True: # click new position for piece                      
                         pos = pygame.mouse.get_pos()
                         space_selected.add(space for space in spaces if space.rect.collidepoint(pos)) # position for piece to move
 
@@ -208,7 +191,6 @@ def main():
                             # jumped a piece
                             if board[y_jumped][x_jumped] != 0 and Piece.get_colour(board[y_jumped][x_jumped]) != Piece.get_colour(my_color):
 
-                                jumped = True
                                 Piece.capture(x_jumped, y_jumped, Piece.get_colour(board[y_jumped][x_jumped]))
                                 board[piece_selected.sprite.y_pos][piece_selected.sprite.x_pos] = 0
                                 
@@ -282,19 +264,16 @@ def getPixels(x_pos, y_pos):
     """
     
     # dictionary with key as square on board and value as pixel position on screen (centre of the board square) 
-    pos_to_pixel = {0:25, 1:75, 2:125, 3:175, 4:225, 5:275, 6:325, 7:375} # should change to soft code 
+    pos_to_pixel = {0:25, 1:75, 2:125, 3:175, 4:225, 5:275, 6:325, 7:375}  
     x_pixel = pos_to_pixel[x_pos]
     y_pixel = pos_to_pixel[y_pos]
-
-    # write something to catch error if board position is not in dictionary (out of bounds, not an integer, etc) 
 
     return (x_pixel, y_pixel)
 
 def dist(x1, x2, y1, y2):
-    """ Distance helper method"""
+    """ Distance helper method """
     distance = math.sqrt((x2 - x1) ** 2 + (y2 - y1) ** 2)
     return distance
-    
-    
+     
 if __name__ == "__main__":
     main()
