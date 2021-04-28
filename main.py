@@ -140,8 +140,6 @@ def main():
     awaiting_red = True
     running = True
        
-    redScore = 0
-    blueScore = 0
     turnCount = 0
 
     while running:
