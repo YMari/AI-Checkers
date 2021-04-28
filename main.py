@@ -15,11 +15,13 @@ surface_sz = 400 # surface size in pixels
 board = numpy.zeros((8,8))
 
 class Piece(pygame.sprite.Sprite):
+
     def __init__(self, x_position, y_position, player):
         pygame.sprite.Sprite.__init__(self)
         
         self.player = player # a colour
         self.radius = 20
+
         (self.x_pixel, self.y_pixel) = (x_position, y_position) # the location at which the piece is initialized
 
     def get_colour(num):
@@ -138,10 +140,15 @@ def main():
     awaiting_red = True
     running = True
        
+    redScore = 0
+    blueScore = 0
+    turnCount = 0
+
     while running:
 
         # human's turn
         if game.turn == 'red':
+            print("\nRed's Turn! Total Possible Moves:", len(game.red_moves(board)))
             awaiting_red = True
             while awaiting_red:
                 jump_possible = False
@@ -231,6 +238,7 @@ def main():
                     
         # computer's turn
         elif game.turn == 'blue':
+            print("Blue's Turn! Total Possible Moves:", len(game.blue_moves(board)),)
             move = game.get_move(board)
 
             # updating the board matrix 
@@ -243,12 +251,13 @@ def main():
         pygame.display.update()
 
         if game.winner(game.turn, board) == 'red':
-            print("Red wins!")
+            print("\nRed wins!", "Total Turns: ", int(turnCount/2))
             running = False
         elif game.winner(game.turn, board) == 'blue':
-            print("Blue wins!")
+            print("\nBlue wins!", "Total Turns: ", int(turnCount/2))
             running = False
-            
+        
+        turnCount += 1    
         game.change_turn()
         
     pygame.quit()
